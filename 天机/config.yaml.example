@@ -1,0 +1,61 @@
+# ============================================================
+# 天机 - 智能体配置文件
+# ============================================================
+
+# LLM 后端配置
+llm:
+  # 可选: deepseek, openai, ollama, custom
+  backend: deepseek
+
+  # API 基础地址
+  # DeepSeek: https://api.deepseek.com
+  # OpenAI:   https://api.openai.com/v1
+  # Ollama:   http://localhost:11434
+  base_url: "https://api.deepseek.com"
+
+  # API Key (通过环境变量 TIANJI_API_KEY 或 DEEPSEEK_API_KEY 设置，不要在文件中硬编码)
+  api_key: ""
+
+  # 模型名称
+  # DeepSeek: deepseek-chat
+  # OpenAI:   gpt-4, gpt-3.5-turbo
+  # Ollama:   llama3, qwen2, etc.
+  model: "deepseek-chat"
+
+  # 模型参数
+  temperature: 0.7
+  max_tokens: 4096
+  top_p: 0.95
+
+# 工具配置
+tools:
+  # 命令执行：允许的命令列表，为空则允许所有
+  allowed_commands: []
+  # 命令执行超时时间（秒）
+  command_timeout: 120
+
+  # 网络搜索
+  web_search:
+    # 搜索引擎: duckduckgo (免费), google, bing
+    engine: duckduckgo
+    # 搜索结果数量
+    max_results: 8
+
+  # 文件操作
+  file:
+    # 允许操作的最大文件大小（字节），默认 10MB
+    max_file_size: 10485760
+    # 工作目录限制，为空则不限制
+    workspace_root: "D:/crow5/智能体"
+
+# 对话记忆
+memory:
+  # 最大对话轮次（超出则丢弃最早的）
+  max_turns: 50
+  # 是否持久化记忆到文件
+  persistent: true
+  # 记忆文件路径
+  storage_path: "memory.json"
+
+# 日志级别: DEBUG, INFO, WARNING, ERROR
+log_level: INFO

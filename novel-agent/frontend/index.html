@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小说创作助手</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+  <!-- ============ 顶栏 ============ -->
+  <header id="topbar">
+    <div class="topbar-left">
+      <span class="app-logo">🪄</span>
+      <h1 class="app-title">小说创作助手</h1>
+    </div>
+    <div class="topbar-center">
+      <select id="story-selector">
+        <option value="">— 选择故事 —</option>
+      </select>
+    </div>
+    <div class="topbar-right">
+      <button id="btn-new-story" class="btn-primary">＋ 新建故事</button>
+      <button id="btn-toggle-panel" class="btn-icon" title="切换侧栏">☰</button>
+    </div>
+  </header>
+
+  <!-- ============ 主体 ============ -->
+  <div id="main-body">
+    <!-- ====== 聊天区域 ====== -->
+    <div id="chat-area">
+      <div id="chat-messages">
+        <!-- 欢迎消息 -->
+        <div class="msg msg-ai">
+          <div class="msg-avatar">🪄</div>
+          <div class="msg-bubble">
+            <p>你好！我是你的 <strong>小说创作助手</strong>。✨</p>
+            <p>你可以直接跟我说你想写什么故事，比如：</p>
+            <ul>
+              <li>「我想写一本修仙小说」</li>
+              <li>「帮我生成故事大纲」</li>
+              <li>「创建一个角色：剑仙李太白」</li>
+              <li>「帮我写第一章」</li>
+            </ul>
+            <p>让我们开始吧！🚀</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 输入区 -->
+      <div id="chat-input-area">
+        <textarea id="chat-input" rows="2" placeholder="给创作助手发送消息..." autofocus></textarea>
+        <button id="btn-send" class="btn-send" title="发送 (Enter)">▶</button>
+      </div>
+      <div class="input-hint">Enter 发送 · Shift+Enter 换行</div>
+    </div>
+
+    <!-- ====== 故事面板（右侧） ====== -->
+    <aside id="story-panel" class="panel-open">
+      <div class="panel-header">
+        <h3>📖 当前故事</h3>
+        <button id="btn-close-panel" class="btn-icon">✕</button>
+      </div>
+
+      <div id="panel-body" class="panel-body">
+        <!-- 无故事时的占位 -->
+        <div id="panel-empty" class="panel-placeholder">
+          <p>还没有选择故事</p>
+          <p class="sub">在聊天中告诉我想写什么，<br>或点击上方「新建故事」</p>
+        </div>
+
+        <!-- 故事信息（选中故事后显示） -->
+        <div id="panel-content" class="hidden">
+          <!-- 标题 -->
+          <div class="panel-section">
+            <div class="section-label">故事名称</div>
+            <div id="panel-story-title" class="section-value">—</div>
+          </div>
+
+          <!-- 大纲 -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-label">📋 大纲</span>
+              <button id="btn-gen-outline" class="btn-tag">AI 生成</button>
+            </div>
+            <div id="panel-outline" class="section-text">暂无大纲</div>
+          </div>
+
+          <!-- 人物 -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-label">👥 人物</span>
+              <button id="btn-add-char" class="btn-tag">＋ 添加</button>
+            </div>
+            <div id="panel-chars" class="section-list"></div>
+          </div>
+
+          <!-- 设定 -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-label">🌍 设定</span>
+              <button id="btn-add-setting" class="btn-tag">＋ 添加</button>
+            </div>
+            <div id="panel-settings" class="section-list"></div>
+          </div>
+
+          <!-- 章节 -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-label">📖 章节</span>
+              <button id="btn-new-chapter" class="btn-tag">＋ 新建</button>
+            </div>
+            <div id="panel-chapters" class="section-list"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ============ 弹窗 ============ -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">标题</h3>
+      <button class="btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body" class="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">取消</button>
+      <button id="btn-modal-confirm" class="btn-primary">确定</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Cache directories
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+*.cache
+
+# Environment
+.env
+.env.*
+venv/
+.venv/
+virtualenv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Runtime data
+memory.json
+
+# Config files with secrets
+天机/config.yaml
+config.yaml
+
+# Temp files
+nul
+*.tmp
+*.temp
