@@ -83,6 +83,20 @@ class ToolRegistry:
 """)
         return "\n".join(lines)
 
+    def auto_register_module(self, module, category: str = "general"):
+        """自动扫描模块中带有 @tool 装饰器的函数并注册"""
+        for name in dir(module):
+            if name.startswith("_"):
+                continue
+            obj = getattr(module, name)
+            if hasattr(obj, "_tool_name") and obj._tool_name:
+                self.register(
+                    name=obj._tool_name,
+                    fn=obj,
+                    description=getattr(obj, "_tool_description", ""),
+                    category=category,
+                )
+
     def __len__(self):
         return len(self._tools)
 
@@ -110,6 +124,9 @@ SYSTEM_PROMPT = """你是「天机」，一个全能的自动化智能体。
 - 不需要调用工具时，直接自然回复
 - 始终使用和用户相同的语言回复
 """
+
+
+from .tool_decorator import tool  # noqa: F401 — 保持兼容性
 
 
 class Agent:
@@ -208,6 +225,14 @@ class Agent:
             description="获取网页内容",
             category="网络",
         )
+
+        # ---- 小说创作 ----
+        try:
+            from features.novel import tools as novel_tools
+
+            self.tools.auto_register_module(novel_tools, category="小说创作")
+        except ImportError as e:
+            logger.warning(f"小说创作工具注册失败: {e}")
 
         # ---- API ----
         at = tools.APITools()

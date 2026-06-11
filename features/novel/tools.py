@@ -4,7 +4,7 @@
 提供写作相关工具函数，覆盖统一数据模型全部字段。
 """
 
-from 天机.core.agent import tool
+from 天机.core.tool_decorator import tool
 from . import manager
 
 
@@ -285,14 +285,224 @@ def update_world(
     return f"世界观「{world['name'] or '未命名'}」已更新！"
 
 
-# 注册列表，供 Agent 自动发现
-__all_tools__ = [
-    create_story,
-    list_stories,
-    get_story,
-    set_outline,
-    add_chapter,
-    update_chapter,
-    add_character,
-    update_world,
-]
+@tool(
+    name="novel_update_story",
+    description="更新故事的基本属性（标题/类型/简介/作者/基调/视角/标签等）",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+        "title": {"type": "string", "description": "新标题"},
+        "genre": {"type": "string", "description": "新类型/体裁"},
+        "description": {"type": "string", "description": "新简介"},
+        "author": {"type": "string", "description": "作者"},
+        "tone": {"type": "string", "description": "故事基调"},
+        "pov": {"type": "string", "description": "叙事视角"},
+        "tags": {"type": "string", "description": "标签，逗号分隔"},
+        "status": {"type": "string", "description": "故事状态"},
+    },
+)
+def update_story(
+    story_id: str,
+    title: str = "",
+    genre: str = "",
+    description: str = "",
+    author: str = "",
+    tone: str = "",
+    pov: str = "",
+    tags: str = "",
+    status: str = "",
+) -> str:
+    kwargs = {}
+    if title:
+        kwargs["title"] = title
+    if genre:
+        kwargs["genre"] = genre
+    if description:
+        kwargs["description"] = description
+    if author:
+        kwargs["author"] = author
+    if tone:
+        kwargs["tone"] = tone
+    if pov:
+        kwargs["pov"] = pov
+    if status:
+        kwargs["status"] = status
+    if tags:
+        kwargs["tags"] = [t.strip() for t in tags.split(",") if t.strip()]
+    if not kwargs:
+        return "未提供任何更新字段。"
+    result = manager.update_story(story_id, **kwargs)
+    if not result:
+        return f"未找到故事 (ID: {story_id})"
+    return f"故事《{result['title']}》已更新！({len(kwargs)} 个字段)"
+
+
+# ── 删除类工具 ───────────────────────────────────────
+
+
+@tool(
+    name="novel_delete_story",
+    description="删除指定故事及其所有数据",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+    },
+)
+def delete_story(story_id: str) -> str:
+    if manager.delete_story(story_id):
+        return f"故事 (ID: {story_id}) 已删除。"
+    return f"未找到故事 (ID: {story_id})"
+
+
+@tool(
+    name="novel_delete_character",
+    description="从故事中删除指定人物",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+        "char_id": {"type": "string", "description": "人物 ID"},
+    },
+)
+def delete_character(story_id: str, char_id: str) -> str:
+    if manager.delete_character(story_id, char_id):
+        return f"人物 (ID: {char_id}) 已删除。"
+    return f"未找到故事 (ID: {story_id}) 或人物 (ID: {char_id})"
+
+
+@tool(
+    name="novel_delete_chapter",
+    description="从故事中删除指定章节",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+        "chapter_id": {"type": "string", "description": "章节 ID"},
+    },
+)
+def delete_chapter(story_id: str, chapter_id: str) -> str:
+    if manager.delete_chapter(story_id, chapter_id):
+        return f"章节 (ID: {chapter_id}) 已删除。"
+    return f"未找到故事 (ID: {story_id}) 或章节 (ID: {chapter_id})"
+
+
+# ── 查询与更新类工具 ───────────────────────────────────
+
+
+@tool(
+    name="novel_get_chapter",
+    description="获取指定章节的完整内容",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+        "chapter_id": {"type": "string", "description": "章节 ID"},
+    },
+)
+def get_chapter(story_id: str, chapter_id: str) -> str:
+    ch = manager.get_chapter(story_id, chapter_id)
+    if not ch:
+        return f"未找到章节 (ID: {chapter_id})"
+    lines = [
+        f"## {ch['title']}",
+        f"**字数**: {ch['word_count']}  |  **状态**: {ch.get('status', 'draft')}",
+        f"**创建**: {ch.get('created_at', '')}  |  **更新**: {ch.get('updated_at', '')}",
+        "",
+        ch.get("content", ""),
+    ]
+    if ch.get("notes"):
+        lines.extend(["", "---", f"**笔记**: {ch['notes']}"])
+    return "\n".join(lines)
+
+
+@tool(
+    name="novel_update_character",
+    description="更新故事中的人物属性",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+        "char_id": {"type": "string", "description": "人物 ID"},
+        "name": {"type": "string", "description": "新名称"},
+        "role": {"type": "string", "description": "角色定位"},
+        "traits": {"type": "string", "description": "性格特征"},
+        "background": {"type": "string", "description": "背景故事"},
+        "appearance": {"type": "string", "description": "外貌描写"},
+        "arc": {"type": "string", "description": "角色成长弧线"},
+    },
+)
+def update_character(
+    story_id: str,
+    char_id: str,
+    name: str = "",
+    role: str = "",
+    traits: str = "",
+    background: str = "",
+    appearance: str = "",
+    arc: str = "",
+) -> str:
+    kwargs = {}
+    if name:
+        kwargs["name"] = name
+    if role:
+        kwargs["role"] = role
+    if traits:
+        kwargs["traits"] = traits
+    if background:
+        kwargs["background"] = background
+    if appearance:
+        kwargs["appearance"] = appearance
+    if arc:
+        kwargs["arc"] = arc
+    if not kwargs:
+        return "未提供任何更新字段。"
+    char = manager.update_character(story_id, char_id, **kwargs)
+    if not char:
+        return f"未找到人物 (ID: {char_id})"
+    return f"人物「{char['name']}」已更新！角色: {char.get('role', '未设置')}"
+
+
+@tool(
+    name="novel_add_world_dimension",
+    description="为世界观添加一个维度/地点条目",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+        "name": {"type": "string", "description": "维度/地点名称"},
+        "description": {"type": "string", "description": "描述"},
+    },
+)
+def add_world_dimension(story_id: str, name: str, description: str = "") -> str:
+    entry = manager.add_world_dimension(story_id, name, description)
+    if not entry:
+        return f"未找到故事 (ID: {story_id})"
+    return f"维度「{entry['name']}」已添加！"
+
+
+# ── 导出与摘要 ───────────────────────────────────────
+
+
+@tool(
+    name="novel_export_story",
+    description="将故事完整导出为 JSON 格式的字符串",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+    },
+)
+def export_story(story_id: str) -> str:
+    result = manager.export_story_json(story_id)
+    if result is None:
+        return f"未找到故事 (ID: {story_id})"
+    return result
+
+
+@tool(
+    name="novel_get_story_summary",
+    description="获取故事摘要（不含章节正文，适合快速概览）",
+    parameters={
+        "story_id": {"type": "string", "description": "故事 ID"},
+    },
+)
+def get_story_summary(story_id: str) -> str:
+    summary = manager.get_story_summary(story_id)
+    if not summary:
+        return f"未找到故事 (ID: {story_id})"
+    lines = [
+        f"## {summary['title']}",
+        f"**作者**: {summary.get('author', '未知')}  |  **类型**: {summary.get('genre', '未设置')}",
+        f"**状态**: {summary.get('status', 'draft')}  |  **基调**: {summary.get('tone', '未设置')}",
+        f"**简介**: {summary.get('description', '无')}",
+        f"**章节**: {summary['chapter_count']}章  |  **人物**: {summary['character_count']}人  |  **总字数**: {summary['char_count']}",
+    ]
+    if summary.get("tags"):
+        lines.append(f"**标签**: {' '.join(summary['tags'])}")
+    return "\n".join(lines)
